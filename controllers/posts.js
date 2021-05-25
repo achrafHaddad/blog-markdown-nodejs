@@ -2,6 +2,7 @@ const marked = require('marked');
 const slugify = require('slugify');
 const createDOMPurify = require('dompurify');
 const { JSDOM } = require('jsdom');
+const fs = require('fs').promises;
 
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
@@ -81,7 +82,9 @@ exports.updatePost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
   try {
-    await Post.findByIdAndDelete(req.params.id);
+    const postDeleted = await Post.findByIdAndDelete(req.params.id);
+    const path = postDeleted.imageLink.split('uploads')[1];
+    await fs.unlink('./uploads' + path);
 
     res.send({ message: 'post deleted' });
   } catch (error) {
