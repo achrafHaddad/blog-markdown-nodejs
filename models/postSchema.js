@@ -7,7 +7,7 @@ const postSchema = new mongoose.Schema(
     description: { type: String, required: true },
     slug: { type: String, unique: true },
     html: String,
-    imageLink: String,
+    imageLink: { type: String, required: true },
   },
   { timestamps: true }
 );

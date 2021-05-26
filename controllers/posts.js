@@ -24,6 +24,14 @@ exports.createPost = async (req, res) => {
     const html = marked(cleanHtml);
     post.html = html;
     post.slug = slugify(req.body.title, { lower: true, strict: true });
+    const count = await Post.countDocuments({});
+
+    if (count >= 5) {
+      const oldestPost = await Post.find({}).sort({ createdAt: 1 }).limit(1);
+      const imagePath = './uploads' + oldestPost[0].imageLink.split('uploads')[1];
+      await Post.deleteOne({ _id: oldestPost[0]._id });
+      await fs.unlink(imagePath);
+    }
 
     await post.save();
     res.send(post);
@@ -77,7 +85,7 @@ exports.updatePost = async (req, res) => {
     post.slug = slug;
 
     await post.save();
-    await fs.unlink(imagePath);
+    if (imagePath) await fs.unlink(imagePath);
 
     res.send(post);
   } catch (error) {
