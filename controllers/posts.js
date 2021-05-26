@@ -62,8 +62,11 @@ exports.updatePost = async (req, res) => {
 
     const post = await Post.findOne({ slug: req.params.slug });
 
+    let imagePath;
+
     if (req.file) {
       const url = req.protocol + '://' + req.get('host');
+      imagePath = './uploads' + post.imageLink.split('uploads')[1];
       post.imageLink = url + '/uploads/' + req.file.filename;
     }
 
@@ -73,7 +76,9 @@ exports.updatePost = async (req, res) => {
     post.html = marked(cleanHtml);
     post.slug = slug;
 
-    post.save();
+    await post.save();
+    await fs.unlink(imagePath);
+
     res.send(post);
   } catch (error) {
     console.log(error);
